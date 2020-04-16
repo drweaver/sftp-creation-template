@@ -45,11 +45,18 @@
             "metadata" : {
                 "description": "DNS label for container group"
             }
+        },
+        "containerGroupName": {
+            "type": "string",
+            "defaultValue": "sftp-group",
+            "metadata" : {
+                "description": "Name for the container group, must be unique within a resource group"
+            }
         }
     },
     "variables": {
         "sftpContainerName": "sftp",
-        "sftpContainerGroupName": "sftp-group",
+        "sftpContainerGroupName": "[parameters('containerGroupName')]",
         "sftpContainerImage": "handymoose/sftp:latest",
         "sftpEnvVariable": "[concat(parameters('sftpUser'), ':', parameters('sftpPassword'), ':1001')]",
         "storageAccountId": "[resourceId(parameters('existingStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('existingStorageAccountName'))]"
