@@ -20,6 +20,18 @@
                 "description": "Name of existing file share to be mounted"
             }
         },
+        "sftpStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of storage account containing sftp keys"
+            }
+        },
+        "sftpFileShareName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of file share containing sftp keys"
+            }
+        },
         "sftpUser": {
             "type": "string",
             "metadata": {
@@ -59,7 +71,8 @@
         "sftpContainerGroupName": "[parameters('containerGroupName')]",
         "sftpContainerImage": "handymoose/sftp:latest",
         "sftpEnvVariable": "[concat(parameters('sftpUser'), ':', parameters('sftpPassword'), ':1001')]",
-        "storageAccountId": "[resourceId(parameters('existingStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('existingStorageAccountName'))]"
+        "storageAccountId": "[resourceId(parameters('existingStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('existingStorageAccountName'))]",
+		"sftpConfigStorageAccountId": "[resourceId(parameters('existingStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('sftpStorageAccountName'))]"
     },
     "resources": [
         {
@@ -108,6 +121,11 @@
                                     "mountPath": "[concat('/home/', parameters('sftpUser'), '/upload')]",
                                     "name": "sftpvolume",
                                     "readOnly": false
+                                },
+								{
+                                    "mountPath": "/etc/sftp",
+                                    "name": "configvolume",
+                                    "readOnly": true
                                 }
                             ]
                         }
@@ -133,6 +151,15 @@
                             "shareName": "[parameters('existingFileShareName')]",
                             "storageAccountName": "[parameters('existingStorageAccountName')]",
                             "storageAccountKey": "[listKeys(variables('storageAccountId'),'2018-02-01').keys[0].value]"
+                        }
+                    },
+					{
+                        "name": "configvolume",
+                        "azureFile": {
+                            "readOnly": true,
+                            "shareName": "[parameters('sftpFileShareName')]",
+                            "storageAccountName": "[parameters('sftpStorageAccountName')]",
+                            "storageAccountKey": "[listKeys(variables('sftpConfigStorageAccountId'),'2018-02-01').keys[0].value]"
                         }
                     }
                 ]
